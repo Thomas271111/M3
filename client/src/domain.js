@@ -1,4 +1,4 @@
-import { todayISO } from "./utils.js";
+import { parseDate, toISODate, todayISO } from "./utils.js";
 
 export const VACCINE_TYPES = [
   { id: "aftosa", nombre: "Fiebre Aftosa", intervaloDias: 182, obligatoriaICA: true },
@@ -20,7 +20,7 @@ export function vaccineLabel(tipoId) {
 }
 
 function daysBetween(a, b) {
-  const ms = new Date(b).setHours(0, 0, 0, 0) - new Date(a).setHours(0, 0, 0, 0);
+  const ms = parseDate(b).setHours(0, 0, 0, 0) - parseDate(a).setHours(0, 0, 0, 0);
   return Math.round(ms / 86400000);
 }
 
@@ -35,9 +35,9 @@ export function edadTexto(fechaNacimiento) {
 export function calcularProximaDosis(tipoId, fecha) {
   const tipo = VACCINE_TYPES.find((t) => t.id === tipoId);
   if (!tipo || !tipo.intervaloDias) return null;
-  const d = new Date(fecha);
+  const d = parseDate(fecha);
   d.setDate(d.getDate() + tipo.intervaloDias);
-  return d.toISOString().slice(0, 10);
+  return toISODate(d);
 }
 
 export function getEstadoVacunacion(animalId, vacunas) {

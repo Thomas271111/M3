@@ -1,10 +1,10 @@
 import { KpiCard } from "../ui/KpiCard.jsx";
 import { getEstadoVacunacion } from "../../domain.js";
-import { formatNumber } from "../../utils.js";
+import { formatNumber, parseDate } from "../../utils.js";
 
 export function DashboardKpis({ activos, vacunas }) {
   const alertas = activos.filter((a) => ["vencida", "proxima"].includes(getEstadoVacunacion(a.id, vacunas).status));
-  const crias = activos.filter((a) => (Date.now() - new Date(a.fechaNacimiento).getTime()) / 86400000 < 182);
+  const crias = activos.filter((a) => (Date.now() - parseDate(a.fechaNacimiento).getTime()) / 86400000 < 182);
   const conPeso = activos.filter((a) => a.pesoKg > 0);
   const promedio = conPeso.length ? Math.round(conPeso.reduce((sum, a) => sum + a.pesoKg, 0) / conPeso.length) : 0;
 

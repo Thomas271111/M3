@@ -7,7 +7,7 @@ export function FincaReportHeader({ finca }) {
         <p className="text-xs font-medium text-text-muted uppercase tracking-wide">Reporte de trazabilidad</p>
         <h2 className="font-display text-xl font-semibold text-text mt-1">{finca.nombre}</h2>
         <p className="text-sm text-text-muted mt-0.5">
-          {finca.vereda}, {finca.municipio}, {finca.departamento}
+          {[finca.vereda, finca.municipio, finca.departamento].filter(Boolean).join(", ") || "Ubicación sin registrar"}
         </p>
       </div>
       <div className="text-sm text-right">
