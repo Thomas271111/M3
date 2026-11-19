@@ -1,17 +1,20 @@
 import { Topbar } from "../components/layout/Topbar.jsx";
 import { useAppData } from "../context/DataContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 import { useToast } from "../context/ToastContext.jsx";
 import { FincaForm } from "../components/configuracion/FincaForm.jsx";
 import { ThemeSwitch } from "../components/configuracion/ThemeSwitch.jsx";
 import { DangerZone } from "../components/configuracion/DangerZone.jsx";
+import { InvitationSection } from "../components/configuracion/InvitationSection.jsx";
+import { WorkersSection } from "../components/configuracion/WorkersSection.jsx";
 
 export function ConfiguracionPage() {
-  const { finca, setFinca } = useAppData();
+  const { finca, saveFinca } = useAppData();
+  const { isOwner } = useAuth();
   const showToast = useToast();
 
-  function handleSave(data) {
-    setFinca({ ...data, unidadPeso: "kg" });
-    showToast("Datos de la finca actualizados.", "success");
+  async function handleSave(data) {
+    if (await saveFinca(data)) showToast("Datos de la finca actualizados.", "success");
   }
 
   return (
@@ -23,8 +26,15 @@ export function ConfiguracionPage() {
             Datos de la finca
           </h2>
           <p className="text-sm text-text-muted mt-0.5">Esta información aparece en los reportes de trazabilidad.</p>
-          <FincaForm finca={finca} onSave={handleSave} />
+          <FincaForm finca={finca} readOnly={!isOwner} onSave={handleSave} />
         </section>
+
+        {isOwner ? (
+          <>
+            <InvitationSection />
+            <WorkersSection />
+          </>
+        ) : null}
 
         <section aria-labelledby="pref-heading" className="mt-6 rounded-card bg-surface border border-border shadow-soft p-5 sm:p-6">
           <h2 id="pref-heading" className="font-display font-semibold text-text">
@@ -33,7 +43,7 @@ export function ConfiguracionPage() {
           <ThemeSwitch />
         </section>
 
-        <DangerZone />
+        {isOwner ? <DangerZone /> : null}
       </main>
     </>
   );

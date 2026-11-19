@@ -30,12 +30,12 @@ export const FAQ_DATA = [
     id: "datos",
     question: "¿Dónde se guardan mis datos?",
     answer:
-      "Este es un prototipo académico: la información se guarda localmente en tu propio navegador, no en un servidor externo. Es ideal para explorar cómo funcionaría MiHato en la vida real."
+      "En una base de datos en la nube (MongoDB Atlas), asociada a tu finca. Solo tú y los trabajadores que invites pueden ver y editar la información de tu hato; otras fincas no tienen acceso a ella."
   },
   {
     id: "costo",
     question: "¿Tiene algún costo probarlo?",
-    answer: "No. Puedes explorar toda la plataforma sin registrarte ni ingresar datos de pago."
+    answer: "No. Es un proyecto académico: creas tu cuenta con solo un correo y una contraseña, sin ingresar datos de pago."
   },
   {
     id: "celular",

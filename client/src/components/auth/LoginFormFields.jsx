@@ -1,6 +1,6 @@
 import { FormField, inputClass } from "../ui/FormField.jsx";
 
-export function LoginFormFields({ email, password, errors, onChange, onBlur }) {
+export function LoginFormFields({ email, password, errors, onChange, onBlur, isNewAccount = false }) {
   return (
     <>
       <FormField label="Correo electrónico" htmlFor="email" required error={errors.email}>
@@ -24,7 +24,7 @@ export function LoginFormFields({ email, password, errors, onChange, onBlur }) {
           onBlur={(e) => onBlur("password", e.target.value)}
           className={inputClass}
           placeholder="Mínimo 8 caracteres, con letras y números"
-          autoComplete="current-password"
+          autoComplete={isNewAccount ? "new-password" : "current-password"}
         />
       </FormField>
     </>

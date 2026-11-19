@@ -1,8 +1,11 @@
 import { Icon } from "../ui/Icon.jsx";
+import { RoleBadge } from "./RoleBadge.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export function Topbar({ title, subtitle, actions }) {
   const { theme, toggleTheme } = useTheme();
+  const { logout } = useAuth();
 
   return (
     <>
@@ -20,6 +23,7 @@ export function Topbar({ title, subtitle, actions }) {
         <div className="flex-1 lg:hidden" />
         <div className="flex items-center gap-2 shrink-0">
           {actions}
+          <RoleBadge />
           <button
             type="button"
             onClick={toggleTheme}
@@ -27,6 +31,14 @@ export function Topbar({ title, subtitle, actions }) {
             className="lg:hidden focus-ring grid place-items-center size-10 rounded-control text-text-muted hover:bg-surface-alt hover:text-text"
           >
             <Icon name={theme === "dark" ? "sun" : "moon"} className="size-5" />
+          </button>
+          <button
+            type="button"
+            onClick={logout}
+            aria-label="Cerrar sesión"
+            className="lg:hidden focus-ring grid place-items-center size-10 rounded-control text-text-muted hover:bg-surface-alt hover:text-text"
+          >
+            <Icon name="arrowLeft" className="size-5" />
           </button>
         </div>
       </header>

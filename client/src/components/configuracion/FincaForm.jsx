@@ -1,47 +1,63 @@
 import { useState } from "react";
 import { FormField, inputClass } from "../ui/FormField.jsx";
 
-export function FincaForm({ finca, onSave }) {
+const FIELDS = ["nombre", "propietario", "vereda", "municipio", "departamento", "codigoICA"];
+
+export function FincaForm({ finca, readOnly = false, onSave }) {
   const [form, setForm] = useState(finca);
+  const [nombreError, setNombreError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    onSave(form);
+    if (!form.nombre.trim()) {
+      setNombreError("Ingresa el nombre de la finca.");
+      return;
+    }
+    setNombreError("");
+    setSaving(true);
+    await onSave(Object.fromEntries(FIELDS.map((f) => [f, form[f]])));
+    setSaving(false);
   }
 
+  const field = (id, label) => (
+    <FormField label={label} htmlFor={id} error={id === "nombre" ? nombreError : ""}>
+      <input id={id} className={inputClass} value={form[id] ?? ""} onChange={(e) => update(id, e.target.value)} />
+    </FormField>
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-      <FormField label="Nombre de la finca" htmlFor="nombre">
-        <input id="nombre" className={inputClass} value={form.nombre} onChange={(e) => update("nombre", e.target.value)} />
-      </FormField>
-      <FormField label="Propietario(a)" htmlFor="propietario">
-        <input id="propietario" className={inputClass} value={form.propietario} onChange={(e) => update("propietario", e.target.value)} />
-      </FormField>
-      <div className="grid sm:grid-cols-2 gap-4">
-        <FormField label="Vereda" htmlFor="vereda">
-          <input id="vereda" className={inputClass} value={form.vereda} onChange={(e) => update("vereda", e.target.value)} />
-        </FormField>
-        <FormField label="Municipio" htmlFor="municipio">
-          <input id="municipio" className={inputClass} value={form.municipio} onChange={(e) => update("municipio", e.target.value)} />
-        </FormField>
-      </div>
-      <div className="grid sm:grid-cols-2 gap-4">
-        <FormField label="Departamento" htmlFor="departamento">
-          <input id="departamento" className={inputClass} value={form.departamento} onChange={(e) => update("departamento", e.target.value)} />
-        </FormField>
-        <FormField label="Código ICA" htmlFor="codigoICA">
-          <input id="codigoICA" className={inputClass} value={form.codigoICA} onChange={(e) => update("codigoICA", e.target.value)} />
-        </FormField>
-      </div>
-      <div className="flex justify-end pt-1">
-        <button type="submit" className="focus-ring rounded-control bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
-          Guardar cambios
-        </button>
-      </div>
+    <form onSubmit={handleSubmit} noValidate className="mt-5">
+      {/* fieldset disabled bloquea todos los campos de golpe para el trabajador (el servidor igual lo rechaza) */}
+      <fieldset disabled={readOnly} className="space-y-4">
+        {field("nombre", "Nombre de la finca")}
+        {field("propietario", "Propietario(a)")}
+        <div className="grid sm:grid-cols-2 gap-4">
+          {field("vereda", "Vereda")}
+          {field("municipio", "Municipio")}
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {field("departamento", "Departamento")}
+          {field("codigoICA", "Código ICA")}
+        </div>
+      </fieldset>
+      {readOnly ? (
+        <p className="mt-4 text-sm text-text-muted">Solo el dueño puede editar los datos de la finca.</p>
+      ) : (
+        <div className="flex justify-end pt-4">
+          <button
+            type="submit"
+            disabled={saving}
+            className="focus-ring rounded-control bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+          >
+            {saving ? "Guardando…" : "Guardar cambios"}
+          </button>
+        </div>
+      )}
     </form>
   );
 }

@@ -25,6 +25,18 @@ export function AnimalDetailPage() {
     ? vacunas.filter((v) => v.animalId === animal.id).sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
     : [];
 
+  async function handleSaveAnimal(data) {
+    if (!(await upsertAnimal(data))) return;
+    setEditOpen(false);
+    showToast("Cambios guardados.", "success");
+  }
+
+  async function handleSaveVacuna(vacuna) {
+    if (!(await upsertVacuna(vacuna))) return;
+    setVaccineOpen(false);
+    showToast("Vacuna registrada correctamente.", "success");
+  }
+
   return (
     <>
       <Topbar title={animal ? animal.nombre || animal.arete : "Detalle del animal"} />
@@ -43,28 +55,14 @@ export function AnimalDetailPage() {
         )}
       </main>
 
-      {editOpen && animal ? (
-        <AnimalModal
-          animal={animal}
-          onClose={() => setEditOpen(false)}
-          onSave={(data) => {
-            upsertAnimal(data);
-            setEditOpen(false);
-            showToast("Cambios guardados.", "success");
-          }}
-        />
-      ) : null}
+      {editOpen && animal ? <AnimalModal animal={animal} onClose={() => setEditOpen(false)} onSave={handleSaveAnimal} /> : null}
 
       {vaccineOpen && animal ? (
         <VaccineModal
           title={`Registrar vacuna · ${animal.nombre || animal.arete}`}
           fixedAnimalId={animal.id}
           onClose={() => setVaccineOpen(false)}
-          onSave={(v) => {
-            upsertVacuna(v);
-            setVaccineOpen(false);
-            showToast("Vacuna registrada correctamente.", "success");
-          }}
+          onSave={handleSaveVacuna}
         />
       ) : null}
     </>

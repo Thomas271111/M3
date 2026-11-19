@@ -2,18 +2,21 @@ import { Finca } from "../models/Finca.js";
 import { User } from "../models/User.js";
 import { comparePassword, hashPassword, signToken } from "../utils/auth.js";
 import { HttpError } from "../utils/httpError.js";
-import { validateLogin, validateRegister } from "../validators/authValidators.js";
+import { cleanText } from "../utils/sanitize.js";
+import { validateLogin, validateRegister, validateRegisterWorker } from "../validators/authValidators.js";
 
 export async function register(req, res) {
   const errors = validateRegister(req.body);
   if (Object.keys(errors).length) throw new HttpError(400, "Datos inválidos", errors);
 
-  const { email, password, fincaNombre } = req.body;
+  const { email, password } = req.body;
+  const nombre = cleanText(req.body.fincaNombre); // sin HTML, igual que el resto de textos libres
+  if (!nombre) throw new HttpError(400, "Datos inválidos", { fincaNombre: "Ingresa el nombre de tu finca." });
   if (await User.exists({ email: email.trim().toLowerCase() })) {
     throw new HttpError(409, "Ya existe una cuenta con ese correo");
   }
 
-  const finca = await Finca.create({ nombre: fincaNombre.trim() });
+  const finca = await Finca.create({ nombre });
   try {
     const user = await User.create({
       email,
@@ -26,6 +29,28 @@ export async function register(req, res) {
     await Finca.findByIdAndDelete(finca.id); // no dejar fincas huérfanas si falla el usuario
     throw err;
   }
+}
+
+export async function registerWorker(req, res) {
+  const errors = validateRegisterWorker(req.body);
+  if (Object.keys(errors).length) throw new HttpError(400, "Datos inválidos", errors);
+
+  const { email, password, codigo } = req.body;
+  const finca = await Finca.findOne({ codigoInvitacion: codigo.trim().toUpperCase() });
+  if (!finca) throw new HttpError(400, "Código de invitación inválido");
+
+  if (await User.exists({ email: email.trim().toLowerCase() })) {
+    throw new HttpError(409, "Ya existe una cuenta con ese correo");
+  }
+
+  // El rol sale del servidor, nunca del cuerpo de la petición.
+  const user = await User.create({
+    email,
+    passwordHash: await hashPassword(password),
+    rol: "trabajador",
+    fincaId: finca.id
+  });
+  res.status(201).json({ token: signToken(user), user, finca });
 }
 
 export async function login(req, res) {

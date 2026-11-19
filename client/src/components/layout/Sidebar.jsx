@@ -1,19 +1,25 @@
 import { NavLink, Link } from "react-router-dom";
 import { Icon } from "../ui/Icon.jsx";
+import { RoleBadge } from "./RoleBadge.jsx";
 import { NAV_ITEMS } from "../../navItems.js";
 import { useAlertCount } from "../../hooks/useAlertCount.js";
 import { useTheme } from "../../context/ThemeContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useAppData } from "../../context/DataContext.jsx";
 
 const linkClass = ({ isActive }) =>
   `group flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors focus-ring ${
     isActive ? "bg-primary-soft text-primary" : "text-text-muted hover:bg-surface-alt hover:text-text"
   }`;
 
+const footerButton =
+  "focus-ring w-full flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium text-text-muted hover:bg-surface-alt hover:text-text";
+
 export function Sidebar() {
   const badge = useAlertCount();
   const { theme, toggleTheme } = useTheme();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const { finca } = useAppData();
 
   return (
     <aside className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:w-64 border-r border-border bg-surface no-print">
@@ -44,20 +50,16 @@ export function Sidebar() {
       </nav>
 
       <div className="p-3 border-t border-border space-y-1">
-        <button
-          type="button"
-          onClick={toggleTheme}
-          aria-pressed={theme === "dark"}
-          className="focus-ring w-full flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium text-text-muted hover:bg-surface-alt hover:text-text"
-        >
+        <div className="px-3 py-2 min-w-0">
+          <p className="text-sm font-medium text-text truncate">{finca?.nombre}</p>
+          <p className="text-xs text-text-muted truncate mb-1.5">{user?.email}</p>
+          <RoleBadge />
+        </div>
+        <button type="button" onClick={toggleTheme} aria-pressed={theme === "dark"} className={footerButton}>
           <Icon name={theme === "dark" ? "sun" : "moon"} className="size-5" />
           <span>Modo oscuro</span>
         </button>
-        <button
-          type="button"
-          onClick={logout}
-          className="focus-ring w-full flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium text-text-muted hover:bg-surface-alt hover:text-text"
-        >
+        <button type="button" onClick={logout} className={footerButton}>
           <Icon name="arrowLeft" className="size-5" />
           <span>Cerrar sesión</span>
         </button>

@@ -3,8 +3,10 @@ import { Icon } from "../ui/Icon.jsx";
 import { VaccinationBadge, EstadoBadge } from "../ui/Badge.jsx";
 import { edadTexto, getEstadoVacunacion } from "../../domain.js";
 import { formatNumber } from "../../utils.js";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export function AnimalRow({ animal, vacunas, onEdit, onDelete }) {
+  const { isOwner } = useAuth();
   const estadoVac = getEstadoVacunacion(animal.id, vacunas);
 
   return (
@@ -32,14 +34,16 @@ export function AnimalRow({ animal, vacunas, onEdit, onDelete }) {
           >
             <Icon name="pencil" className="size-4.5" />
           </button>
-          <button
-            type="button"
-            onClick={() => onDelete(animal)}
-            className="focus-ring grid place-items-center size-9 rounded-control text-text-muted hover:bg-surface hover:text-danger"
-            aria-label={`Eliminar ${animal.arete}`}
-          >
-            <Icon name="trash" className="size-4.5" />
-          </button>
+          {isOwner ? (
+            <button
+              type="button"
+              onClick={() => onDelete(animal)}
+              className="focus-ring grid place-items-center size-9 rounded-control text-text-muted hover:bg-surface hover:text-danger"
+              aria-label={`Eliminar ${animal.arete}`}
+            >
+              <Icon name="trash" className="size-4.5" />
+            </button>
+          ) : null}
         </div>
       </td>
     </tr>

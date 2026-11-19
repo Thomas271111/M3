@@ -4,6 +4,7 @@ import { AppShell } from "./components/layout/AppShell.jsx";
 import { LandingPage } from "./pages/LandingPage.jsx";
 import { ContactoPage } from "./pages/ContactoPage.jsx";
 import { LoginPage } from "./pages/LoginPage.jsx";
+import { RegisterPage } from "./pages/RegisterPage.jsx";
 import { DashboardPage } from "./pages/DashboardPage.jsx";
 import { AnimalesPage } from "./pages/AnimalesPage.jsx";
 import { AnimalDetailPage } from "./pages/AnimalDetailPage.jsx";
@@ -18,6 +19,7 @@ export function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/contacto" element={<ContactoPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/registro" element={<RegisterPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>

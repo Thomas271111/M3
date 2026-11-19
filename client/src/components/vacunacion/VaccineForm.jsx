@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { VACCINE_TYPES, uid, calcularProximaDosis } from "../../domain.js";
+import { VACCINE_TYPES, calcularProximaDosis } from "../../domain.js";
 import { todayISO } from "../../utils.js";
 import { FormField, inputClass } from "../ui/FormField.jsx";
 import { VaccineFormFooterFields } from "./VaccineFormFooterFields.jsx";
@@ -7,12 +7,13 @@ import { VaccineFormFooterFields } from "./VaccineFormFooterFields.jsx";
 export function VaccineForm({ animals, fixedAnimalId, onCancel, onSave }) {
   const [form, setForm] = useState({ animalId: fixedAnimalId || "", tipo: "aftosa", fecha: todayISO(), lote: "", veterinario: "", notas: "" });
   const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const newErrors = {};
     if (!fixedAnimalId && !form.animalId) newErrors.animalId = "Selecciona un animal.";
@@ -20,17 +21,17 @@ export function VaccineForm({ animals, fixedAnimalId, onCancel, onSave }) {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    onSave({
-      id: uid("vac"),
+    setSaving(true);
+    await onSave({
       animalId: fixedAnimalId || form.animalId,
       tipo: form.tipo,
       fecha: form.fecha,
       fechaProximaDosis: calcularProximaDosis(form.tipo, form.fecha),
       lote: form.lote.trim(),
       veterinario: form.veterinario.trim(),
-      notas: form.notas.trim(),
-      fechaRegistro: todayISO()
+      notas: form.notas.trim()
     });
+    setSaving(false);
   }
 
   return (
@@ -65,7 +66,7 @@ export function VaccineForm({ animals, fixedAnimalId, onCancel, onSave }) {
         </FormField>
       </div>
 
-      <VaccineFormFooterFields form={form} onUpdate={update} onCancel={onCancel} />
+      <VaccineFormFooterFields form={form} onUpdate={update} onCancel={onCancel} saving={saving} />
     </form>
   );
 }

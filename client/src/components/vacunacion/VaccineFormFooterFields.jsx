@@ -1,6 +1,6 @@
 import { FormField, inputClass } from "../ui/FormField.jsx";
 
-export function VaccineFormFooterFields({ form, onUpdate, onCancel }) {
+export function VaccineFormFooterFields({ form, onUpdate, onCancel, saving = false }) {
   return (
     <>
       <div className="grid sm:grid-cols-2 gap-4">
@@ -27,8 +27,12 @@ export function VaccineFormFooterFields({ form, onUpdate, onCancel }) {
         <button type="button" onClick={onCancel} className="focus-ring rounded-control px-4 py-2.5 text-sm font-medium text-text-muted hover:bg-surface-alt">
           Cancelar
         </button>
-        <button type="submit" className="focus-ring rounded-control bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
-          Registrar vacuna
+        <button
+          type="submit"
+          disabled={saving}
+          className="focus-ring rounded-control bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+        >
+          {saving ? "Guardando…" : "Registrar vacuna"}
         </button>
       </div>
     </>

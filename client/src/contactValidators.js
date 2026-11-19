@@ -1,5 +1,3 @@
-import { todayISO } from "./utils.js";
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const CONTACT_VALIDATORS = {
@@ -22,15 +20,3 @@ export const CONTACT_VALIDATORS = {
     return "";
   }
 };
-
-export function saveContacto(entry) {
-  const KEY = "mihato:contactos";
-  let list = [];
-  try {
-    list = JSON.parse(localStorage.getItem(KEY)) || [];
-  } catch {
-    list = [];
-  }
-  list.push({ ...entry, fecha: todayISO() });
-  localStorage.setItem(KEY, JSON.stringify(list));
-}

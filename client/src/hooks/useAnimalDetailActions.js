@@ -16,8 +16,7 @@ export function useAnimalDetailActions(animal) {
       confirmLabel: "Eliminar",
       danger: true
     });
-    if (!ok) return;
-    deleteAnimal(animal.id);
+    if (!ok || !(await deleteAnimal(animal.id))) return;
     showToast("Animal eliminado del hato.", "info");
     navigate("/animales");
   }
@@ -30,7 +29,7 @@ export function useAnimalDetailActions(animal) {
       danger: true
     });
     if (!ok) return;
-    deleteVacuna(vacunaId);
+    if (await deleteVacuna(vacunaId)) showToast("Registro de vacuna eliminado.", "info");
   }
 
   return { handleDeleteAnimal, handleDeleteVacuna };

@@ -23,8 +23,8 @@ export function VacunacionPage() {
     setModal(animal ? { animalId: animal.id, animal } : {});
   }
 
-  function handleSave(vacuna) {
-    upsertVacuna(vacuna);
+  async function handleSave(vacuna) {
+    if (!(await upsertVacuna(vacuna))) return;
     setModal(null);
     showToast("Vacuna registrada correctamente.", "success");
   }

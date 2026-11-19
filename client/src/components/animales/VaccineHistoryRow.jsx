@@ -1,8 +1,11 @@
 import { Icon } from "../ui/Icon.jsx";
 import { vaccineLabel } from "../../domain.js";
 import { formatDate } from "../../utils.js";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export function VaccineHistoryRow({ vacuna, onDelete }) {
+  const { isOwner } = useAuth();
+
   return (
     <div className="flex items-start gap-3 px-5 py-3.5">
       <span className="shrink-0 grid place-items-center size-9 rounded-full bg-primary-soft text-primary mt-0.5">
@@ -18,14 +21,16 @@ export function VaccineHistoryRow({ vacuna, onDelete }) {
         {vacuna.fechaProximaDosis ? <p className="text-xs text-text-muted mt-0.5">Próxima dosis: {formatDate(vacuna.fechaProximaDosis)}</p> : null}
         {vacuna.notas ? <p className="text-xs text-text-muted mt-1">{vacuna.notas}</p> : null}
       </div>
-      <button
-        type="button"
-        onClick={() => onDelete(vacuna.id)}
-        className="focus-ring shrink-0 grid place-items-center size-8 rounded-control text-text-muted hover:bg-surface-alt hover:text-danger"
-        aria-label="Eliminar registro de vacuna"
-      >
-        <Icon name="trash" className="size-4" />
-      </button>
+      {isOwner ? (
+        <button
+          type="button"
+          onClick={() => onDelete(vacuna.id)}
+          className="focus-ring shrink-0 grid place-items-center size-8 rounded-control text-text-muted hover:bg-surface-alt hover:text-danger"
+          aria-label="Eliminar registro de vacuna"
+        >
+          <Icon name="trash" className="size-4" />
+        </button>
+      ) : null}
     </div>
   );
 }

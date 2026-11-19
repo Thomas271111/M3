@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { CATEGORIAS, ESTADOS, uid } from "../../domain.js";
-import { todayISO } from "../../utils.js";
+import { CATEGORIAS, ESTADOS } from "../../domain.js";
 import { FormField, inputClass } from "../ui/FormField.jsx";
 import { AnimalFormExtraFields } from "./AnimalFormExtraFields.jsx";
 
@@ -9,12 +8,13 @@ const EMPTY_ANIMAL = { arete: "", nombre: "", sexo: "H", categoria: "Vaca", raza
 export function AnimalForm({ animal, onCancel, onSave }) {
   const [form, setForm] = useState(animal || EMPTY_ANIMAL);
   const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const newErrors = {};
     if (!form.arete.trim()) newErrors.arete = "Ingresa el arete o ID del animal.";
@@ -22,17 +22,22 @@ export function AnimalForm({ animal, onCancel, onSave }) {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    onSave({
-      id: animal?.id || uid("animal"),
-      ...form,
+    setSaving(true);
+    // Solo se envían los campos del formulario: id, fincaId y fechaRegistro los controla el servidor.
+    await onSave({
+      id: animal?.id,
       arete: form.arete.trim(),
       nombre: form.nombre.trim(),
+      sexo: form.sexo,
+      categoria: form.categoria,
       raza: form.raza.trim(),
-      potrero: form.potrero.trim(),
-      notas: form.notas.trim(),
+      fechaNacimiento: form.fechaNacimiento,
       pesoKg: form.pesoKg ? Number(form.pesoKg) : 0,
-      fechaRegistro: animal?.fechaRegistro || todayISO()
+      potrero: form.potrero.trim(),
+      estado: form.estado,
+      notas: form.notas.trim()
     });
+    setSaving(false);
   }
 
   return (
@@ -68,8 +73,8 @@ export function AnimalForm({ animal, onCancel, onSave }) {
         <button type="button" onClick={onCancel} className="focus-ring rounded-control px-4 py-2.5 text-sm font-medium text-text-muted hover:bg-surface-alt">
           Cancelar
         </button>
-        <button type="submit" className="focus-ring rounded-control bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover">
-          {animal ? "Guardar cambios" : "Agregar animal"}
+        <button type="submit" disabled={saving} className="focus-ring rounded-control bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60">
+          {saving ? "Guardando…" : animal ? "Guardar cambios" : "Agregar animal"}
         </button>
       </div>
     </form>

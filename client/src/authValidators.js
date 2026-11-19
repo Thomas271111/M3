@@ -11,7 +11,20 @@ export const LOGIN_VALIDATORS = {
   password: (v) => {
     if (!v) return "Ingresa tu contraseña.";
     if (v.length < 8) return "La contraseña debe tener al menos 8 caracteres.";
+    if (v.length > 128) return "La contraseña no puede superar 128 caracteres.";
     if (!/[a-zA-Z]/.test(v) || !/[0-9]/.test(v)) return "Debe incluir al menos una letra y un número.";
     return "";
   }
+};
+
+export const REGISTER_VALIDATORS = {
+  ...LOGIN_VALIDATORS,
+  fincaNombre: (v) => (v.trim() ? "" : "Ingresa el nombre de tu finca."),
+  codigo: (v) => (v.trim() ? "" : "Ingresa el código de invitación que te dio el dueño.")
+};
+
+// Campos que se piden en cada tipo de registro.
+export const REGISTER_FIELDS = {
+  dueno: ["email", "password", "fincaNombre"],
+  trabajador: ["email", "password", "codigo"]
 };

@@ -35,13 +35,11 @@ export function AnimalesPage() {
       confirmLabel: "Eliminar",
       danger: true
     });
-    if (!ok) return;
-    deleteAnimal(animal.id);
-    showToast("Animal eliminado del hato.", "info");
+    if (ok && (await deleteAnimal(animal.id))) showToast("Animal eliminado del hato.", "info");
   }
 
-  function handleSave(data) {
-    upsertAnimal(data);
+  async function handleSave(data) {
+    if (!(await upsertAnimal(data))) return; // el aviso de error ya lo mostró el DataContext
     setModalOpen(false);
     showToast(editingAnimal ? "Cambios guardados." : "Animal agregado al hato.", "success");
   }

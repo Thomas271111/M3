@@ -1,14 +1,22 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { LoadingBlock } from "./ui/DataStatus.jsx";
 
 /**
- * Ruta de layout: si no hay usuario autenticado, redirige a /login guardando la
- * ubicación que se intentaba visitar (para poder volver ahí después de iniciar
- * sesión). Si hay usuario, renderiza las rutas hijas a través de <Outlet />.
+ * Ruta de layout: espera a que se verifique el token (evita el parpadeo al recargar), y si no hay
+ * sesión redirige a /login guardando la ubicación pedida para volver ahí después de iniciar sesión.
  */
 export function ProtectedRoute() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="min-h-dvh flex">
+        <LoadingBlock label="Verificando sesión…" />
+      </div>
+    );
+  }
 
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />;

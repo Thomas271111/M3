@@ -42,7 +42,7 @@ export function MarketingFooter() {
       <div className="border-t border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row gap-2 justify-between items-center text-xs text-text-muted">
           <p>© 2026 MiHato. Proyecto académico de Diseño y Arquitectura Web.</p>
-          <p>Prototipo con datos de demostración.</p>
+          <p>React · Express · MongoDB Atlas</p>
         </div>
       </div>
     </footer>
