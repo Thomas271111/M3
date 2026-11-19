@@ -1,3 +1,5 @@
+## https://trello.com/invite/b/6aff7d9badb2bf3a1f0504fb/ATTIfb5fb2bd28fe944e12676b9636df04e9AF343B5E/mi-tablero-de-trello
+
 # Tickets Milestone 3 — MiHato (Full-Stack)
 
 Stack: React (`client/`) + Express (`server/`) + MongoDB Atlas + JWT, desplegado en Vercel.

@@ -4,8 +4,8 @@
 
 | | URL |
 |---|---|
-| Cliente (Vercel) | _pendiente: pegar aquí la URL tras desplegar_ |
-| API (Vercel) | _pendiente: pegar aquí la URL tras desplegar_ (`/api/health` debe responder `{"ok":true}`) |
+| Cliente (Vercel) | https://m3-virid.vercel.app |
+| API (Vercel) | https://mihato.vercel.app (estado: [`/api/health`](https://mihato.vercel.app/api/health) responde `{"ok":true}`) |
 | Figma | ver [`figma-link.txt`](figma-link.txt) |
 | Bitácora de uso de IA | [`AI_LOG.md`](AI_LOG.md) |
 
@@ -36,7 +36,14 @@ MiHato reemplaza el cuaderno por un sistema con cuatro funcionalidades demostrab
 
 Los permisos **se hacen cumplir en el servidor** (middleware `authorize`, responde `403`); la interfaz solo oculta los botones por comodidad. Todo dato lleva `fincaId` y un usuario solo accede a los de su finca (cualquier id de otra finca responde `404`).
 
-## 3. Arquitectura
+## 3. Cómo probarlo
+
+1. Abre https://m3-virid.vercel.app y entra en **Probar la plataforma** → **Regístrate** → *Soy dueño* (correo, contraseña de 8+ caracteres con letra y número, y nombre de la finca).
+2. Una finca nueva empieza **vacía**. En **Configuración → Zona de riesgo → Cargar datos de demostración** se cargan 18 animales con sus vacunas de ejemplo.
+3. Recorre Dashboard, Animales, Vacunación y Trazabilidad (exporta el CSV).
+4. En **Configuración → Invitar trabajadores** genera un código. En una ventana privada, regístrate con *Soy trabajador* usando ese código: verás los mismos datos, pero sin botones de eliminar ni zona de riesgo (y la API responde `403` si lo intentas por fuera de la interfaz).
+
+## 4. Arquitectura
 
 ```
 client/  React 18 + Vite + React Router (HashRouter) + Tailwind v4   → Vercel (proyecto 1)
@@ -47,6 +54,7 @@ server/  Express 4 + Mongoose + JWT + helmet                         → Vercel 
 - **Cliente:** el estado global vive en Context (`AuthContext`, `DataContext`, `ToastContext`, `ConfirmContext`, `ThemeContext`). Toda llamada HTTP pasa por [`client/src/api.js`](client/src/api.js), que agrega el JWT y cierra la sesión si el servidor responde `401`. `DataContext` carga animales, vacunas y finca desde la API al iniciar sesión; las escrituras (`useDataActions`) llaman a la API y solo entonces actualizan el estado.
 - **Servidor:** `routes/` → `controllers/` → `models/`, con `middleware/` (`authenticate`, `authorize`, `rateLimit`, `errorHandler`) y `validators/` (el servidor nunca confía en el cliente).
 - **Reportes de trazabilidad:** se arman en el cliente a partir de los datos ya traídos de la API (el cálculo de vacunación vive en `client/src/domain.js`).
+- **Fechas:** las fechas de calendario (`YYYY-MM-DD`) se interpretan en hora local (`parseDate` en `client/src/utils.js`), para que no se muestren un día antes en zonas horarias al oeste de UTC.
 
 ### Esquema de la base de datos
 
@@ -58,7 +66,7 @@ server/  Express 4 + Mongoose + JWT + helmet                         → Vercel 
 | `vacunas` | `fincaId`, `animalId`, `tipo`, `fecha`, `fechaProximaDosis`, `lote`, `veterinario`, `notas`, `fechaRegistro` |
 | `contactos` | `nombre`, `correo`, `finca`, `cabezas` (formulario público de la landing) |
 
-## 4. Instalación local
+## 5. Instalación local
 
 Requisitos: Node 18+ y un cluster de MongoDB Atlas (el plan gratuito sirve).
 
@@ -85,24 +93,24 @@ En Atlas: crea un usuario de base de datos y, en **Network Access**, permite tu 
 | server | `MONGODB_URI` | Cadena de conexión de Atlas, con el nombre de la base (`/mihato`) |
 | server | `JWT_SECRET` | Secreto de firma, mínimo 16 caracteres (el servidor se niega a firmar sin él) |
 | server | `JWT_EXPIRES_IN` | Vida del token, por defecto `7d` |
-| server | `CLIENT_URL` | Origen(es) permitidos por CORS, separados por coma |
+| server | `CLIENT_URL` | Origen(es) permitidos por CORS, separados por coma. En producción: `https://m3-virid.vercel.app` (sin barra final) |
 | server | `PORT` | Solo local, por defecto `4000` |
 | server | `DNS_SERVERS` | Opcional, solo local (ver `.env.example`) |
-| client | `VITE_API_URL` | URL base de la API **incluyendo `/api`**, sin barra final. Es obligatoria en producción: si falta, la app muestra un error claro en vez de llamar a `localhost` |
+| client | `VITE_API_URL` | URL base de la API **incluyendo `/api`**, sin barra final. En producción: `https://mihato.vercel.app/api`. Es obligatoria: si falta, la app muestra un error claro en vez de llamar a `localhost` |
 | server | `NODE_ENV` | Vercel la fija en `production`. Opcional `development` solo para ver el stack de errores en local |
 
-## 5. Despliegue en Vercel (dos proyectos)
+## 6. Despliegue en Vercel (dos proyectos)
 
-1. **API:** importa el repositorio en Vercel, *Root Directory* = `server`. Define `MONGODB_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `CLIENT_URL` (la URL del cliente, que se conoce después: vuelve y edítala). `server/vercel.json` reescribe todas las rutas a `server/api/index.js`, que exporta la app de Express.
-2. **Cliente:** otro proyecto, *Root Directory* = `client`, framework Vite. Define `VITE_API_URL=https://<url-de-la-api>/api`. Se mantiene `HashRouter`, así que no hace falta configurar reescrituras.
+1. **API:** importa el repositorio en Vercel, *Root Directory* = `server`. Define `MONGODB_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `CLIENT_URL` (la URL del cliente, que se conoce después: vuelve y edítala). `server/vercel.json` reescribe todas las rutas a `server/api/index.js`, que exporta la app de Express. Quedó en https://mihato.vercel.app.
+2. **Cliente:** otro proyecto, *Root Directory* = `client`, framework Vite. Define `VITE_API_URL=https://mihato.vercel.app/api`. Se mantiene `HashRouter`, así que no hace falta configurar reescrituras. Quedó en https://m3-virid.vercel.app.
 3. Vuelve al proyecto de la API, actualiza `CLIENT_URL` con la URL real del cliente y **redespliega** (las variables solo se leen al desplegar).
-4. Comprueba: `GET <api>/api/health` → `{"ok":true}`; registra un dueño desde el cliente, crea un animal e invita a un trabajador.
+4. Comprueba: `GET https://mihato.vercel.app/api/health` → `{"ok":true}`; registra un dueño desde el cliente, crea un animal e invita a un trabajador.
 
 > La contraseña del usuario de Atlas debe ser fuerte antes de desplegar; nunca se sube al repositorio (`.env` está en `.gitignore`).
 
-## 6. Documentación de la API
+## 7. Documentación de la API
 
-Base: `/api`. Autenticación: cabecera `Authorization: Bearer <token>`. Errores: `{ "message": "...", "errors": { campo: "mensaje" } }`.
+Base: `https://mihato.vercel.app/api`. Autenticación: cabecera `Authorization: Bearer <token>`. Errores: `{ "message": "...", "errors": { campo: "mensaje" } }`.
 
 | Método | Ruta | Rol | Descripción | Respuestas |
 |---|---|---|---|---|
@@ -132,12 +140,13 @@ Base: `/api`. Autenticación: cabecera `Authorization: Bearer <token>`. Errores:
 Ejemplo:
 
 ```bash
+API=https://mihato.vercel.app/api
 curl -X POST $API/auth/login -H "Content-Type: application/json" \
   -d '{"email":"dueno@ejemplo.com","password":"Clave1234"}'
 # → { "token": "eyJ...", "user": { "id": "...", "email": "...", "rol": "dueno", "fincaId": "..." }, "finca": { ... } }
 ```
 
-## 7. Seguridad
+## 8. Seguridad
 
 | Riesgo | Medida |
 |---|---|
@@ -155,7 +164,7 @@ curl -X POST $API/auth/login -H "Content-Type: application/json" \
 
 **Limitaciones conocidas (para ser honestos en la defensa):** el contador del rate limit vive en memoria, así que en Vercel es por instancia y no global; el token se guarda en `localStorage` (si hubiera un XSS podría leerse; la alternativa sería una cookie `HttpOnly`); no hay verificación de correo ni recuperación de contraseña.
 
-## 8. Estructura del repositorio
+## 9. Estructura del repositorio
 
 ```
 client/src/   api.js · context/ · hooks/ · pages/ · components/ · domain.js
